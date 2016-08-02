@@ -1,0 +1,5 @@
+<a class="_54nc" href="#" rel="async-post" ajaxify="/ajax/timeline/all_activity/remove_content.php?action=remove_comment&amp;ent_identifier=S%3A_I1749979000%3A1169145333138208%3A0&amp;story_dom_id=u_jsonp_3_b&amp;timeline_token=1749979000%3A1169145333138208%3A0%3A1469927714%3A1469927714" role="menuitem"><span><span class="_54nh">Delete</span></span></a>
+
+<a class="_54nc" href="#" rel="async-post" ajaxify="/ajax/timeline/all_activity/remove_content.php?action=unlike&amp;ent_identifier=S%3A_I1749979000%3A10201880851780177%3A2&amp;story_dom_id=u_jsonp_3_f&amp;timeline_token=1749979000%3A10201880851780177%3A2%3A1469927027%3A1469366835" role="menuitem"><span><span class="_54nh">Unlike</span></span></a>
+
+<a class="_54nc" href="#" rel="async-post" ajaxify="/ajax/timeline/delete/confirm?identifier=S%3A_I1749979000%3A1154643641255044&amp;location=3&amp;story_dom_id=u_0_2g&amp;causal_container_id=u_0_2h" role="menuitem"><span><span class="_54nh">Delete</span></span></a>
