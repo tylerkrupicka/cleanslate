@@ -1,19 +1,20 @@
 {
   "manifest_version": 2,
-
   "name": "Clean Slate",
   "description": "The facebook clean slate",
   "version": "0.0.0",
   "icons" : {
   },
-  "content_scripts": [
-    {
-      "matches": ["http://www.facebook.com/*", "https://www.facebook.com/*"],
-      "js": ["jquery.js", "script.js"],
-      "all_frames": true
-    }
-  ],
+  "background": {
+      "scripts": ["background.js"],
+      "persistent": false
+  },
+  "page_action": {
+      "default_title": "Clean Slate",
+      "default_popup": "popup.html"
+  },
   "permissions": [
+    "tabs",
     "activeTab"
   ]
 }
