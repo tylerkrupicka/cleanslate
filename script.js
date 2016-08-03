@@ -6,15 +6,46 @@ function run(){
     console.log("I'M TINY RICK");
 }
 
+function getYearFromEntry(entry) {
+/*
+    Return the year that the given activity log entry is from as a String.
+    If the date cannot be found, then return an empty string.
+    TODO: Find a more robust way to find the date of the log entry
+*/
+    // find the span in the log entry that should contain the date of the entry
+    var dateSpan = entry.find("td > div > div > span");
+    if (dateSpan.length == 0) {
+        return "";
+    }
+    // see if the date is hyperlinked
+    var dateLink = $(dateSpan[0]).find("a");
+    if (dateLink.length == 0) {
+        // some entry types, such as pokes, do not have a hyperlinked date
+        return $(dateSpan[0]).text().split(" ")[2];
+    } else {
+        // other entry types do have hyperlinked dates, so get the date from the link text
+        return $(dateLink[0]).text().split(" ")[2];
+    }
+}
+
 function clickEditButtons(){
     /*
         Click the edit buttons so that the menuItems get loaded.
     */
-    var editButtons = $("a[data-hover='tooltip'][data-tooltip-content='Edit'][rel='toggle']");
-    console.log("Clicking " + editButtons.length + " edit buttons.");
-    for (var i = 0; i < editButtons.length; i++) {
-        editButtons[i].click();
+    var clickCount = 0;
+    var logEntries = $("table");
+    for (var i = 0; i < logEntries.length; i++) {
+        var currentEntry = $(logEntries[i]);
+        var editButton = currentEntry.find("a[data-hover='tooltip'][data-tooltip-content='Edit'][rel='toggle']");
+        if (editButton.length == 0) {
+            continue;
+        } else {
+            var year = getYearFromEntry(currentEntry);
+            editButton.click();
+            clickCount++;
+        }
     }
+    console.log("Clicked " + clickCount + " edit buttons.");
 }
 
 function clickActionButtons(){
