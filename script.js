@@ -13,7 +13,6 @@ for (i = 0; i < buttons.length; i++) {
         console.log("like");
         console.log(buttons[i]);
         //buttons[i].click();
-        break;
     } else {
         console.log("something else");
         console.log(buttons[i]);
