@@ -41,7 +41,7 @@ function clickEditButtons(){
             continue;
         } else {
             var year = getYearFromEntry(currentEntry);
-            editButton.click();
+            editButton[0].click();
             clickCount++;
         }
     }
