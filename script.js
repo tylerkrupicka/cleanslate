@@ -1,8 +1,11 @@
 function run(){
     console.log("Clean Slate Running..");
-    clickEditButtons();
-    clickActionButtons();
-    scrollToBottom();
+    for(var i = 0; i < 15; i++){
+        clickEditButton(); //click first edit button
+        clickActionButton(); //click first action button
+        scrollDown(); //start scroll before removing
+        removeElement(); //remove from dom (don't reselect)
+    }
     console.log("I'M TINY RICK");
 }
 
@@ -28,47 +31,52 @@ function getYearFromEntry(entry) {
     }
 }
 
-function clickEditButtons(){
+function clickEditButton(){
     /*
-        Click the edit buttons so that the menuItems get loaded.
+        Click the first edit button so that the menuItems get loaded.
+        Label the table we found so that we can edit it later.
     */
-    var clickCount = 0;
-    var logEntries = $("table");
-    for (var i = 0; i < logEntries.length; i++) {
-        var currentEntry = $(logEntries[i]);
-        var editButton = currentEntry.find("a[data-hover='tooltip'][data-tooltip-content='Edit'][rel='toggle']");
-        if (editButton.length == 0) {
-            continue;
-        } else {
-            var year = getYearFromEntry(currentEntry);
-            editButton[0].click();
-            clickCount++;
-        }
+    var currentEntry = $($("table")[0]);
+    var editButton = currentEntry.find("a[data-hover='tooltip'][data-tooltip-content='Edit'][rel='toggle']");
+    if (editButton.length != 0) {
+        var year = getYearFromEntry(currentEntry);
+        editButton[0].click();
+        currentEntry.attr("cleanslate", "true"); //apply label attribute
     }
-    console.log("Clicked " + clickCount + " edit buttons.");
+    console.log("Found edit button from " + year);
 }
 
-function clickActionButtons(){
+function clickActionButton(){
     /*
         Click the menu buttons that will actually delete content.
     */
-    var buttons = $("a[role='menuitem']");
-    for (i = 0; i < buttons.length; i++) {
-        var ajax = $(buttons[i]).attr("ajaxify");
-        if (ajax && ajax.indexOf("comment") != -1) {
-            console.log("Found comment.. ");
-        } else if (ajax && ajax.indexOf("unlike") != -1) {
-            console.log("Found like.. ");
-            //buttons[i].click();
-        } else {
-            console.log("Found something else.. ");
-        }
+    var button = $("a[role='menuitem']")[0];
+    var ajax = $(button).attr("ajaxify");
+    if (ajax && ajax.indexOf("comment") != -1) {
+        console.log("Uncomment.. ");
+    } else if (ajax && ajax.indexOf("unlike") != -1) {
+        console.log("Unlike.. ");
+        //buttons[i].click();
+    } else {
+        console.log("Found something else.. ");
     }
 }
 
-function scrollToBottom(){
-    /* Scroll to the bottom of the page */
-    $('html, body').scrollTop($(document).height());
+function scrollDown(){
+    /*
+        Scroll down to the table about to be deleted to kick off loading more.
+    */
+    var currentEntry = $("table[cleanslate='true']");
+    $('html,body').scrollTop($(currentEntry).offset().top);
+}
+
+function removeElement(){
+    /*
+        Remove the already parsed table from the DOM;
+    */
+    console.log("remove called");
+    var currentEntry = $("table[cleanslate='true']");
+    $(currentEntry).remove();
 }
 
 run();
