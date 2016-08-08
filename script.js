@@ -39,13 +39,27 @@ function run(){
     console.log("Clean Slate Running..");
 
     // initialize status variables
-    setNextYear();
-    setNextMonth();
-    setNextPost();
-    currentStatus = Status.CLEANING;
+    resetState();
 
     doNextAction();
     console.log("I'M TINY RICK");
+}
+
+function resetState() {
+    /*
+        Set the currentYear to the first year of activity present, set the
+        currentMonth to the first month of the currentYear, set the currentPost
+        to the first post of the currentMonth, and set the currentStatus to
+        Status.CLEANING.
+    */
+    currentYear = null;
+    currentMonth = null;
+    currentPost = null;
+    currentStatus = Status.CLEANING;
+
+    setNextYear();
+    setNextMonth();
+    setNextPost();
 }
 
 function setNextYear() {
@@ -191,6 +205,7 @@ function doNextAction() {
             waitForMonthToLoad();
             break;
         case Status.DONE:
+            resetState();
             break;
         default:
             console.log("Invalid Status:" + currentStatus);
