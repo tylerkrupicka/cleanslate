@@ -38,6 +38,10 @@ function run(){
     */
     console.log("Clean Slate Running..");
 
+    // convert cleanFromDate and cleanToDate script options to Date objects
+    scriptOptions.cleanFromDate = new Date(scriptOptions.cleanFromDate);
+    scriptOptions.cleanToDate = new Date(scriptOptions.cleanToDate);
+
     // initialize status variables
     resetState();
 
@@ -201,10 +205,11 @@ function doNextAction() {
             waitForMorePosts();
             break;
         case Status.WAIT_FOR_NEXT_MONTH:
-            break; //TODO remove this
             waitForMonthToLoad();
             break;
         case Status.DONE:
+            currentPost = null;
+            cleanMarkedPosts(); // in case the final post wasn't cleaned
             resetState();
             break;
         default:
@@ -213,15 +218,15 @@ function doNextAction() {
 }
 
 function cleanCurrentPost() {
-    // click the edit button for the current post
-    var postId = clickEditButton();
-    // click the action button for the current post
-    clickActionButton(postId);
+    // clean any posts that have been previously marked as okay to clean
+    cleanMarkedPosts();
     // scroll to the current post
     scrollDown();
-    // delete the current post (this shouldn't be necessary once we ACTUALLY click the action button)
-    removeElement();
-    // set the next post
+    // click the edit button for the current post
+    var postId = clickEditButton();
+    // mark the currentPost and corresponding action button if it should be cleaned
+    markPostAndActionButton(postId);
+    // set currentPost to the next post
     setNextPost();
     // keep chugging
     doNextAction();
@@ -296,20 +301,34 @@ function clickEditButton(){
         editButton = currentPost.find("a[data-hover='tooltip'][data-tooltip-content='Allowed on Timeline'][rel='toggle']");
     }
     if (editButton.length) {
-        var year = parseYearFromEntry(currentPost);
-        editButton[0].click();
-        return $(editButton[0]).attr("id");
+        var postDate = parseDateFromEntry(currentPost);
+        if (!postDate || postDate > scriptOptions.cleanToDate) {
+            // perhaps couldn't find a date, so don't clean this to be safe.
+            // otherwise, the post is too recent based on the date range so don't
+            // click this edit button
+            return null;
+        } else if (postDate < scriptOptions.cleanFromDate) {
+            // the post is too old based on the date range, so stop cleaning.
+            currentStatus = Status.DONE;
+            return null;
+        } else {
+            // the post is within the date range, so click this edit button.
+            editButton[0].click();
+            return $(editButton[0]).attr("id");
+        }
     } else {
         return null;
     }
 }
 
-function clickActionButton(postId){
+function markPostAndActionButton(postId){
     /*
         Click the menu buttons that will actually delete content. The postId
         is the id of the edit button of the post. The corresponding action
         button can be found by looking for the element with the data-ownerid
         attribute equal to the postId.
+        If this post meets the criteria based on the form in the popup, then
+        mark this post and the button that should be clicked.
     */
     if (!postId) {
         return;
@@ -325,27 +344,39 @@ function clickActionButton(postId){
     var ajax = $(button[0]).attr("ajaxify");
     // determine which type of action button this is
     if (ajax && ajax.indexOf("comment") != -1) {
-        if(comment){
+        if(scriptOptions.comment){
+            currentPost.attr("cleanslate", "true");
+            currentPost.attr("cleanslate-post-id", postId);
+            $(button[0]).attr("cleanslate-type", "comment");
+            $(button[0]).attr("cleanslate-button-id", postId);
             console.log("Uncomment.. ");
-            //buttons[0].click();
         }
     } else if (ajax && ajax.indexOf("unlike") != -1) {
-        if(like){
+        if(scriptOptions.like){
+            currentPost.attr("cleanslate", "true");
+            currentPost.attr("cleanslate-post-id", postId);
+            $(button[0]).attr("cleanslate-type", "like");
+            $(button[0]).attr("cleanslate-button-id", postId);
             console.log("Unlike.. ");
-            //buttons[0].click();
         }
     } else if (ajax && ajax.indexOf("allow") != -1){
         ajax = $(button[1]).attr("ajaxify");
         if(ajax.indexOf("hide") != -1){
-            if(post){
+            if(scriptOptions.post){
+                currentPost.attr("cleanslate", "true");
+                currentPost.attr("cleanslate-post-id", postId);
+                $(button[1]).attr("cleanslate-type", "post");
+                $(button[1]).attr("cleanslate-button-id", postId);
                 console.log("Hide.. ");
-                //buttons[1].click();
             }
         }
     } else if (ajax && ajax.indexOf("timeline/delete/confirm")){
-        if(friends){
+        if(scriptOptions.friends){
+            currentPost.attr("cleanslate", "true");
+            currentPost.attr("cleanslate-post-id", postId);
+            $(button[0]).attr("cleanslate-type", "friends");
+            $(button[0]).attr("cleanslate-button-id", postId);
             console.log("Delete post on friends timeline.. ");
-            //buttons[0].click();
         }
     }
     else {
@@ -361,12 +392,23 @@ function scrollDown(){
     $('html,body').scrollTop((currentPost).offset().top);
 }
 
-function removeElement(){
+function cleanMarkedPosts(){
     /*
-        Remove the already parsed post from the DOM;
+        Remove any posts that have been marked to be cleaned EXCEPT for the
+        currentPost since removing the currentPost will cause us to lose our
+        place in the Activity Log.
     */
-    var currentEntry = currentPost.find("table");
-    $(currentEntry).remove();
+    var markedPosts = $("[cleanslate='true']");
+    for (var i = 0; i < markedPosts.length; i++) {
+        var post = $(markedPosts[i]);
+        var postId = post.attr("cleanslate-post-id");
+        if (postId !== currentPost.attr("cleanslate-post-id")) {
+            // this post isn't the currentPost so it is okay to clean it up
+            var button = $("[cleanslate-button-id='" + postId + "']")[0];
+            // button.click(); TODO: uncomment when ready to actually click the button
+            post.remove(); // TODO: shouldn't need this once we actually click the button
+        }
+    }
 }
 
 function isCurrentMonthLoaded() {
@@ -379,26 +421,48 @@ function isCurrentMonthLoaded() {
     return !currentMonth.find(".async_saving").length;
 }
 
-function parseYearFromEntry(entry) {
+function parseDateFromEntry(entry) {
 /*
-    Return the year that the given activity log entry is from as a String.
-    If the date cannot be found, then return an empty string.
+    Return a Date object representing the month and year that the given activity
+    log entry is from.
+    If the date cannot be found, then return null.
     TODO: Find a more robust way to find the date of the log entry
 */
+    // map from Facebook month display values to month index number
+    var monthMapping = {
+        "Jan": 0,
+        "Feb": 1,
+        "Mar": 2,
+        "Apr": 3,
+        "May": 4,
+        "Jun": 5,
+        "Jul": 6,
+        "Aug": 7,
+        "Sep": 8,
+        "Oct": 9,
+        "Nov": 10,
+        "Dec": 11
+    }
     // find the span in the log entry that should contain the date of the entry
     var dateSpan = entry.find("td > div > div > span");
     if (dateSpan.length == 0) {
-        return "";
+        return null;
     }
     // see if the date is hyperlinked
     var dateLink = $(dateSpan[0]).find("a");
+    var dateString;
     if (dateLink.length == 0) {
         // some entry types, such as pokes, do not have a hyperlinked date
-        return $(dateSpan[0]).text().split(" ")[2];
+        dateString = $(dateSpan[0]).text();
     } else {
         // other entry types do have hyperlinked dates, so get the date from the link text
-        return $(dateLink[0]).text().split(" ")[2];
+        dateString = $(dateLink[0]).text();
     }
+    // convert the string into a Date object
+    var splitDate = dateString.split(" ");
+    var postMonth = splitDate[0];
+    var postYear = Number(splitDate[2]);
+    return new Date(postYear, monthMapping[postMonth]);
 }
 
 // do the thing

@@ -1,5 +1,4 @@
 body {
-    height: 150px;
     width: 200px;
 }
 #clean-button {
@@ -10,12 +9,13 @@ body {
     padding: 10px 0px 0px 0px;
     text-align: center;
     border-radius: 5px;
-    position: fixed;
-    bottom: 0px;
-    width: 90%;
-    margin: 5px 5px 5px 5px;
+    width: 194px;
+    margin: 20px auto 0;
     cursor: pointer;
 
+}
+#clean-to-year {
+    margin-bottom: 10px;
 }
 #title{
     text-align: center;
