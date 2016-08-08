@@ -17,6 +17,9 @@ body {
 #clean-to-year {
     margin-bottom: 10px;
 }
+#error-message {
+    text-align: center;
+}
 #title{
     text-align: center;
 }

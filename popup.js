@@ -9,19 +9,8 @@ document.addEventListener("DOMContentLoaded", function() {
         var scriptOptions = getScriptOptions(); //get parameters to pass to script
         console.log(scriptOptions);
         if (!isValidDateRange(scriptOptions)) {
-            if (!document.getElementById("error-message")) {
-                // briefly show error message since the date range is invalid
-                // and it isn't already shown
-                var errorMessage = document.createElement("p");
-                errorMessage.setAttribute("id", "error-message");
-                errorMessage.innerHTML = "Invalid date range";
-                var body = document.getElementsByTagName("body")[0];
-                body.appendChild(errorMessage);
-                setTimeout(function() {
-                    body.removeChild(errorMessage);
-                }, 2000);
-            }
             // DON'T try to clean since the date range is invalid/meaningless
+            showErrorMessage();
             return;
         }
         chrome.tabs.query({
@@ -120,4 +109,21 @@ function isValidDateRange(scriptOptions) {
         but could be extended to check more rules in the future.
     */
     return scriptOptions.cleanFromDate <= scriptOptions.cleanToDate;
+}
+
+function showErrorMessage() {
+    /*
+        Briefly show an invalid date range error message to the user if
+        the error message isn't already being displayed.
+    */
+    if (!document.getElementById("error-message")) {
+        var errorMessage = document.createElement("p");
+        errorMessage.setAttribute("id", "error-message");
+        errorMessage.innerHTML = "Invalid date range";
+        var body = document.getElementsByTagName("body")[0];
+        body.appendChild(errorMessage);
+        setTimeout(function() {
+            body.removeChild(errorMessage);
+        }, 2000);
+    }
 }

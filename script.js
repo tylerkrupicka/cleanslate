@@ -323,12 +323,11 @@ function clickEditButton(){
 
 function markPostAndActionButton(postId){
     /*
-        Click the menu buttons that will actually delete content. The postId
-        is the id of the edit button of the post. The corresponding action
-        button can be found by looking for the element with the data-ownerid
-        attribute equal to the postId.
         If this post meets the criteria based on the form in the popup, then
         mark this post and the button that should be clicked.
+        he postId is the id of the edit button of the post. The corresponding
+        action button can be found by looking for the element with the
+        data-ownerid attribute equal to the postId.
     */
     if (!postId) {
         return;
@@ -345,37 +344,25 @@ function markPostAndActionButton(postId){
     // determine which type of action button this is
     if (ajax && ajax.indexOf("comment") != -1) {
         if(scriptOptions.comment){
-            currentPost.attr("cleanslate", "true");
-            currentPost.attr("cleanslate-post-id", postId);
-            $(button[0]).attr("cleanslate-type", "comment");
-            $(button[0]).attr("cleanslate-button-id", postId);
+            markPostAndButton(postId, $(button[0]), "comment");
             console.log("Uncomment.. ");
         }
     } else if (ajax && ajax.indexOf("unlike") != -1) {
         if(scriptOptions.like){
-            currentPost.attr("cleanslate", "true");
-            currentPost.attr("cleanslate-post-id", postId);
-            $(button[0]).attr("cleanslate-type", "like");
-            $(button[0]).attr("cleanslate-button-id", postId);
+            markPostAndButton(postId, $(button[0]), "like");
             console.log("Unlike.. ");
         }
     } else if (ajax && ajax.indexOf("allow") != -1){
         ajax = $(button[1]).attr("ajaxify");
         if(ajax.indexOf("hide") != -1){
             if(scriptOptions.post){
-                currentPost.attr("cleanslate", "true");
-                currentPost.attr("cleanslate-post-id", postId);
-                $(button[1]).attr("cleanslate-type", "post");
-                $(button[1]).attr("cleanslate-button-id", postId);
+                markPostAndButton(postId, $(button[1]), "post");
                 console.log("Hide.. ");
             }
         }
     } else if (ajax && ajax.indexOf("timeline/delete/confirm")){
         if(scriptOptions.friends){
-            currentPost.attr("cleanslate", "true");
-            currentPost.attr("cleanslate-post-id", postId);
-            $(button[0]).attr("cleanslate-type", "friends");
-            $(button[0]).attr("cleanslate-button-id", postId);
+            markPostAndButton(postId, $(button[0]), "friends");
             console.log("Delete post on friends timeline.. ");
         }
     }
@@ -419,6 +406,16 @@ function isCurrentMonthLoaded() {
     // if the currentMonth div has a child div with class `async_saving`, then
     // the current month hasn't finished loading yet.
     return !currentMonth.find(".async_saving").length;
+}
+
+function markPostAndButton(postId, button, postType) {
+    /*
+        Mark the currentPost and the given action button to be cleaned later on.
+    */
+    currentPost.attr("cleanslate", "true");
+    currentPost.attr("cleanslate-post-id", postId);
+    button.attr("cleanslate-type", postType);
+    button.attr("cleanslate-button-id", postId);
 }
 
 function parseDateFromEntry(entry) {
