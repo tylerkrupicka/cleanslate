@@ -187,6 +187,7 @@ function doNextAction() {
             waitForMorePosts();
             break;
         case Status.WAIT_FOR_NEXT_MONTH:
+            break; //TODO remove this
             waitForMonthToLoad();
             break;
         case Status.DONE:
@@ -276,10 +277,12 @@ function clickEditButton(){
         Return null if the edit button is not found.
     */
     var editButton = currentPost.find("a[data-hover='tooltip'][data-tooltip-content='Edit'][rel='toggle']");
+    if(!editButton.length){
+        editButton = currentPost.find("a[data-hover='tooltip'][data-tooltip-content='Allowed on Timeline'][rel='toggle']");
+    }
     if (editButton.length) {
         var year = parseYearFromEntry(currentPost);
         editButton[0].click();
-        console.log("Found edit button from " + year);
         return $(editButton[0]).attr("id");
     } else {
         return null;
@@ -307,12 +310,32 @@ function clickActionButton(postId){
     var ajax = $(button[0]).attr("ajaxify");
     // determine which type of action button this is
     if (ajax && ajax.indexOf("comment") != -1) {
-        console.log("Uncomment.. ");
+        if(comment){
+            console.log("Uncomment.. ");
+            //buttons[0].click();
+        }
     } else if (ajax && ajax.indexOf("unlike") != -1) {
-        console.log("Unlike.. ");
-        //buttons[i].click();
-    } else {
+        if(like){
+            console.log("Unlike.. ");
+            //buttons[0].click();
+        }
+    } else if (ajax && ajax.indexOf("allow") != -1){
+        ajax = $(button[1]).attr("ajaxify");
+        if(ajax.indexOf("hide") != -1){
+            if(post){
+                console.log("Hide.. ");
+                //buttons[1].click();
+            }
+        }
+    } else if (ajax && ajax.indexOf("timeline/delete/confirm")){
+        if(friends){
+            console.log("Delete post on friends timeline.. ");
+            //buttons[0].click();
+        }
+    }
+    else {
         console.log("Found something else.. ");
+        console.log(ajax);
     }
 }
 
@@ -327,7 +350,6 @@ function removeElement(){
     /*
         Remove the already parsed post from the DOM;
     */
-    console.log("remove called");
     var currentEntry = currentPost.find("table");
     $(currentEntry).remove();
 }

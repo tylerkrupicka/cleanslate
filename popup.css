@@ -1,6 +1,6 @@
 body {
-    height: 200px;
-    width: 100px;
+    height: 150px;
+    width: 200px;
 }
 #clean-button {
     height: 40px;
@@ -12,9 +12,10 @@ body {
     border-radius: 5px;
     position: fixed;
     bottom: 0px;
-    width: 90px;
+    width: 90%;
     margin: 5px 5px 5px 5px;
     cursor: pointer;
+
 }
 #title{
     text-align: center;
