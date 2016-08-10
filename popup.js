@@ -8,9 +8,14 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("clean-button").addEventListener("click", function() {
         var scriptOptions = getScriptOptions(); //get parameters to pass to script
         console.log(scriptOptions);
+        if (!isAnyBoxChecked(scriptOptions)) {
+            // Don't try to clean if there is nothing that the user wants to hide/remove
+            showErrorMessage("You must check at least one option");
+            return;
+        }
         if (!isValidDateRange(scriptOptions)) {
             // DON'T try to clean since the date range is invalid/meaningless
-            showErrorMessage();
+            showErrorMessage("Invalid Date Range");
             return;
         }
         chrome.tabs.query({
@@ -100,7 +105,7 @@ function getScriptOptions() {
         post: document.getElementById("post").checked,
         friends: document.getElementById("friends").checked
     }
-};
+}
 
 function isValidDateRange(scriptOptions) {
     /*
@@ -111,7 +116,11 @@ function isValidDateRange(scriptOptions) {
     return scriptOptions.cleanFromDate <= scriptOptions.cleanToDate;
 }
 
-function showErrorMessage() {
+function isAnyBoxChecked(scriptOptions) {
+    return scriptOptions.like || scriptOptions.comment || scriptOptions.post || scriptOptions.friends;
+}
+
+function showErrorMessage(msg) {
     /*
         Briefly show an invalid date range error message to the user if
         the error message isn't already being displayed.
@@ -119,7 +128,7 @@ function showErrorMessage() {
     if (!document.getElementById("error-message")) {
         var errorMessage = document.createElement("p");
         errorMessage.setAttribute("id", "error-message");
-        errorMessage.innerHTML = "Invalid date range";
+        errorMessage.innerHTML = msg;
         var body = document.getElementsByTagName("body")[0];
         body.appendChild(errorMessage);
         setTimeout(function() {
