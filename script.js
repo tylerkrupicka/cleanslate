@@ -346,11 +346,13 @@ function markPostAndActionButton(postId){
         if(scriptOptions.comment){
             markPostAndButton(postId, $(button[0]), "comment");
             console.log("Uncomment.. ");
+            button[0].click();
         }
     } else if (ajax && ajax.indexOf("unlike") != -1) {
         if(scriptOptions.like){
             markPostAndButton(postId, $(button[0]), "like");
             console.log("Unlike.. ");
+            button[0].click();
         }
     } else if (ajax && ajax.indexOf("allow") != -1){
         ajax = $(button[1]).attr("ajaxify");
@@ -358,12 +360,14 @@ function markPostAndActionButton(postId){
             if(scriptOptions.post){
                 markPostAndButton(postId, $(button[1]), "post");
                 console.log("Hide.. ");
+                button[1].click();
             }
         }
     } else if (ajax && ajax.indexOf("timeline/delete/confirm")){
         if(scriptOptions.friends){
-            markPostAndButton(postId, $(button[0]), "friends");
+            //markPostAndButton(postId, $(button[0]), "friends");
             console.log("Delete post on friends timeline.. ");
+            button[0].click();
         }
     }
     else {
