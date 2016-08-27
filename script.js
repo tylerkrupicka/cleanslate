@@ -357,7 +357,13 @@ function markPostAndActionButton(postId){
     } else if (ajax && ajax.indexOf("allow") != -1){
         ajax = $(button[1]).attr("ajaxify");
         if(ajax.indexOf("hide") != -1){
-            if(scriptOptions.post){
+            if(button[2] && $(button[2]).attr("ajaxify").indexOf("unfan") != -1){ //check for a fan page unlike
+                if(scriptOptions.like){
+                    markPostAndButton(postId, $(button[2]), "like");
+                    console.log("UnFan.. ");
+                    button[2].click();
+                }
+            } else if(scriptOptions.post){
                 markPostAndButton(postId, $(button[1]), "post");
                 console.log("Hide.. ");
                 button[1].click();
@@ -365,7 +371,7 @@ function markPostAndActionButton(postId){
         }
     } else if (ajax && ajax.indexOf("timeline/delete/confirm")){
         if(scriptOptions.friends){
-            //markPostAndButton(postId, $(button[0]), "friends");
+            markPostAndButton(postId, $(button[0]), "friends");
             console.log("Delete post on friends timeline.. ");
             button[0].click();
         }
